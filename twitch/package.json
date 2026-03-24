@@ -1,0 +1,17 @@
+{
+  "name": "twitch-macropad-service",
+  "version": "1.0.0",
+  "description": "MacroPad → Twitch API bridge. Listens for global hotkeys and routes them to the Twitch Helix API.",
+  "main": "service.js",
+  "scripts": {
+    "start": "node service.js",
+    "auth": "node auth.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "uiohook-napi": "^1.5.4"
+  }
+}

@@ -3,16 +3,17 @@
 # Hardware : Adafruit MacroPad RP2040
 # Runtime  : CircuitPython 8.x+
 #
-# Layer 0 (Blue)  — Stream Control  : OBS scenes, Twitch tools, clip markers
-# Layer 1 (Green) — Productivity    : Media, Discord, system shortcuts
+# Layer 0 (Blue)   — Stream Control  : OBS scenes, mic mute, start/stop stream
+# Layer 1 (Green)  — Twitch Commands : F13-F22 hotkeys → Node.js twitch service
+# Layer 2 (Yellow) — Productivity    : Media, Discord, system shortcuts
 #
 # Rotary encoder
 #   Rotate       → System volume up / down
-#   Tap          → Toggle layer
+#   Tap          → Cycle layer (0 → 1 → 2 → 0)
 #   Hold (1 s)   → Global mute
 #
-# Key 11 on Stream layer = [EXIT] — 30-second stop-stream sequence
-#   Press once   → Switch to "Ending Soon" scene + start countdown
+# Key 12 on Stream layer = [STOP] — 30-second stop-stream sequence
+#   Press once   → Switch to "End Stream" scene + start countdown
 #   Press again  → Cancel countdown, stay live
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -30,14 +31,17 @@ macropad.pixels.auto_write = False
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 LAYER_STREAM = 0
-LAYER_PROD   = 1
+LAYER_TWITCH = 1
+LAYER_PROD   = 2
 
-BLUE  = (0, 0, 60)
-GREEN = (0, 60, 0)
-RED   = (60, 0, 0)
+BLUE   = (0,  0,  60)
+GREEN  = (0,  60, 0)
+YELLOW = (60, 60, 0)
+PURPLE = (40, 0,  60)
+RED    = (60, 0,  0)
 
-LAYER_COLORS = [BLUE, GREEN]
-LAYER_NAMES  = ["STREAM CTRL", "PRODUCTIVITY"]
+LAYER_COLORS = [BLUE, GREEN, YELLOW]
+LAYER_NAMES  = ["STREAM CTRL", "TWITCH", "PRODUCTIVITY"]
 
 CTRL  = Keycode.CONTROL
 ALT   = Keycode.ALT
@@ -46,11 +50,11 @@ SHIFT = Keycode.SHIFT
 HOLD_THRESHOLD = 1.0   # seconds before encoder hold fires
 EXIT_DURATION  = 30    # seconds in exit countdown
 
-# ── Shared state (dict avoids scattered globals) ──────────────────────────────
+# ── Shared state ──────────────────────────────────────────────────────────────
 S = {
     "layer":          LAYER_STREAM,
-    "clip_count":     0,
-    "stream_start":   None,   # monotonic timestamp of first LIVE press
+    "scene":          "--",    # label of last OBS scene switched to
+    "stream_start":   None,    # monotonic timestamp of first LIVE press
     "exit_active":    False,
     "exit_start":     None,
     "last_enc_pos":   macropad.encoder,
@@ -64,49 +68,69 @@ S = {
 # Actions:
 #   "keys"     → keyboard.press(*payload) — payload is a tuple of Keycodes
 #   "consumer" → consumer_control.send(payload)
-#   "type"     → keyboard_layout.write(payload)  — types a string
-#   "clip"     → like "keys" but also increments clip counter
+#   "type"     → keyboard_layout.write(payload) — types a string
+#   "clip"     → like "keys" but also increments clip counter (single Keycode)
 #   "exit"     → 30-second stop-stream sequence (no payload)
-#   "none"     → no-op (placeholder)
+#   "none"     → no-op (reserved slot)
 
 KEYMAP = [
     # ── Layer 0: Stream Control ───────────────────────────────────────────────
-    # Row 1              Row 2              Row 3
-    # [LIVE] [GHOST][BRB]  [CHAT][CAM-X][MIC-X]  [STAT][AD][CLIP]
+    # Row 1                      Row 2                Row 3
+    # [STARTING][STEAM][LIVE]    [GHOST][BRB][CHAT]   [TWITTER][END SCN][REFRESH]
     # Row 4
-    # [HYPE][CMND][EXIT]
+    # [MIC][START][STOP]
     [
-        ("LIVE",   "keys",     (CTRL, ALT, Keycode.ONE)),
-        ("GHOST",  "keys",     (CTRL, ALT, Keycode.TWO)),
-        ("BRB",    "keys",     (CTRL, ALT, Keycode.THREE)),
-        ("CHAT",   "keys",     (CTRL, ALT, Keycode.FOUR)),
-        ("CAM-X",  "keys",     (CTRL, ALT, Keycode.C)),
-        ("MIC-X",  "keys",     (CTRL, ALT, Keycode.M)),
-        ("STAT",   "keys",     (CTRL, ALT, Keycode.S)),
-        ("AD",     "keys",     (Keycode.F17,)),
-        ("CLIP",   "clip",     Keycode.F13),
-        ("HYPE",   "clip",     Keycode.F14),
-        ("CMND",   "keys",     (Keycode.F15,)),
-        ("EXIT",   "exit",     None),
+        ("STARTING", "keys", (CTRL, ALT, Keycode.ONE)),
+        ("STEAM",    "keys", (CTRL, ALT, Keycode.TWO)),
+        ("LIVE",     "keys", (CTRL, ALT, Keycode.THREE)),
+        ("GHOST",    "keys", (CTRL, ALT, Keycode.FOUR)),
+        ("BRB",      "keys", (CTRL, ALT, Keycode.FIVE)),
+        ("CHAT",     "keys", (CTRL, ALT, Keycode.SIX)),
+        ("TWITTER",  "keys", (CTRL, ALT, Keycode.SEVEN)),
+        ("END SCN",  "keys", (CTRL, ALT, Keycode.EIGHT)),
+        ("REFRESH",  "keys", (CTRL, ALT, Keycode.R)),
+        ("MIC",      "keys", (CTRL, ALT, Keycode.M)),
+        ("START",    "keys", (CTRL, ALT, SHIFT, Keycode.F11)),
+        ("STOP",     "exit", None),
     ],
-    # ── Layer 1: Productivity ─────────────────────────────────────────────────
-    # Row 1               Row 2               Row 3
-    # [PLAY][SKIP][PREV]  [MUTE-M][D-MUTE][D-DEAF]  [D-LINK][LURK][SNAP]
+    # ── Layer 1: Twitch Commands ──────────────────────────────────────────────
+    # F13-F22 hotkeys are intercepted by the Node.js twitch service on the PC.
+    # Row 1                      Row 2                  Row 3
+    # [EKLIPSE][CLIP][CLIP45]    [CLIP60][HYPE][JOKE]   [DOGFACT][----][----]
     # Row 4
-    # [LOCK][TIMER][RELOAD]
+    # [----][----][----]
+    [
+        ("EKLIPSE", "keys", (Keycode.F13,)),
+        ("MARKER",  "keys", (Keycode.F14,)),
+        ("HYPE",    "keys", (Keycode.F15,)),
+        ("JOKE",    "keys", (Keycode.F16,)),
+        ("DOGFACT", "keys", (Keycode.F17,)),
+        ("DISCORD", "keys", (Keycode.F18,)),
+        ("SOCIALS", "keys", (Keycode.F19,)),
+        ("SCHED",   "keys", (Keycode.F20,)),
+        ("UPTIME",  "keys", (Keycode.F21,)),
+        ("----",    "none", None),
+        ("----",    "none", None),
+        ("----",    "none", None),
+    ],
+    # ── Layer 2: Productivity ─────────────────────────────────────────────────
+    # Row 1                  Row 2                      Row 3
+    # [PLAY][SKIP][PREV]     [MUTE-M][D-MUTE][D-DEAF]   [D-LINK][LURK][SNAP]
+    # Row 4
+    # [LOCK][AD][TIMER]
     [
         ("PLAY",   "consumer", ConsumerControlCode.PLAY_PAUSE),
         ("SKIP",   "consumer", ConsumerControlCode.SCAN_NEXT_TRACK),
         ("PREV",   "consumer", ConsumerControlCode.SCAN_PREVIOUS_TRACK),
         ("MUTE-M", "consumer", ConsumerControlCode.MUTE),
-        ("D-MUTE", "keys",     (CTRL, ALT, Keycode.F1)),   # set in Discord settings
-        ("D-DEAF", "keys",     (CTRL, ALT, Keycode.F2)),   # set in Discord settings
-        ("D-LINK", "keys",     (Keycode.F16,)),
-        ("LURK",   "type",     "Thanks for lurking! o7"),
-        ("SNAP",   "keys",     (CTRL, SHIFT, Keycode.FOUR)),
-        ("LOCK",   "keys",     (CTRL, SHIFT, Keycode.Q)),
-        ("TIMER",  "keys",     (CTRL, ALT, Keycode.T)),    # OBS BRB timer scene
-        ("RELOAD", "keys",     (CTRL, ALT, Keycode.R)),    # OBS browser source reload
+        ("D-MUTE", "keys",     (CTRL, ALT, Keycode.F1)),
+        ("D-DEAF", "keys",     (CTRL, ALT, Keycode.F2)),
+        ("RELOAD", "keys",     (CTRL, ALT, Keycode.R)),
+        ("LURK",   "keys",     (CTRL, SHIFT, Keycode.F1)),
+        ("SNAP",   "keys",     (Keycode.GUI, SHIFT, Keycode.S)),
+        ("LOCK",   "keys",     (Keycode.GUI, Keycode.L)),
+        ("AD",     "keys",     (CTRL, SHIFT, Keycode.F2)),
+        ("TIMER",  "keys",     (CTRL, ALT, Keycode.T)),
     ],
 ]
 
@@ -114,10 +138,10 @@ KEYMAP = [
 _group     = displayio.Group()
 lbl_layer  = label.Label(terminalio.FONT, text="STREAM CTRL", color=0xFFFFFF, x=2, y=8)
 lbl_uptime = label.Label(terminalio.FONT, text="OFFLINE",     color=0xAAAAAA, x=2, y=24)
-lbl_clips  = label.Label(terminalio.FONT, text="CLIPS: 0",    color=0xAAAAAA, x=2, y=40)
+lbl_scene  = label.Label(terminalio.FONT, text="SCN: --",     color=0xAAAAAA, x=2, y=40)
 lbl_status = label.Label(terminalio.FONT, text="READY",       color=0xFFFFFF, x=2, y=56)
 
-for _lbl in (lbl_layer, lbl_uptime, lbl_clips, lbl_status):
+for _lbl in (lbl_layer, lbl_uptime, lbl_scene, lbl_status):
     _group.append(_lbl)
 
 macropad.display.show(_group)
@@ -132,7 +156,7 @@ def _fmt_time(seconds):
 
 def refresh_display(status="READY"):
     lbl_layer.text  = LAYER_NAMES[S["layer"]]
-    lbl_clips.text  = f"CLIPS: {S['clip_count']}"
+    lbl_scene.text  = f"SCN: {S['scene']}"
     lbl_status.text = status
     lbl_uptime.text = (
         _fmt_time(time.monotonic() - S["stream_start"])
@@ -145,9 +169,9 @@ def refresh_pixels():
     base = LAYER_COLORS[S["layer"]]
     for i in range(12):
         macropad.pixels[i] = base
-    # EXIT key always red on stream layer so it's unmistakable
     if S["layer"] == LAYER_STREAM:
-        macropad.pixels[11] = RED
+        macropad.pixels[10] = PURPLE  # START key — distinct from scene keys
+        macropad.pixels[11] = RED     # STOP key — unmistakable
     macropad.pixels.show()
 
 # ── Action helpers ────────────────────────────────────────────────────────────
@@ -159,8 +183,8 @@ def _send_keys(payload):
 def _begin_exit():
     S["exit_active"] = True
     S["exit_start"]  = time.monotonic()
-    # Switch OBS to "Ending Soon" scene
-    macropad.keyboard.press(CTRL, ALT, Keycode.E)
+    # Switch OBS to "End Stream" scene
+    macropad.keyboard.press(CTRL, ALT, Keycode.EIGHT)
     macropad.keyboard.release_all()
 
 
@@ -209,8 +233,12 @@ def handle_key(idx):
             _begin_exit()
             refresh_display(f"EXIT: {EXIT_DURATION:2d}s")
 
-    # Start uptime clock on first LIVE press (key 0, stream layer)
-    if S["layer"] == LAYER_STREAM and idx == 0 and S["stream_start"] is None:
+    # Track current scene (Layer 0, keys 0–7 are scene switches)
+    if S["layer"] == LAYER_STREAM and idx <= 7:
+        S["scene"] = name
+
+    # Start uptime clock on first LIVE press (Layer 0, key index 2)
+    if S["layer"] == LAYER_STREAM and idx == 2 and S["stream_start"] is None:
         S["stream_start"] = time.monotonic()
 
 # ── Startup ───────────────────────────────────────────────────────────────────
@@ -238,14 +266,13 @@ while True:
             macropad.consumer_control.send(code)
     S["last_enc_pos"] = pos
 
-    # ── Encoder button — tap: layer toggle / hold: mute ───────────────────────
+    # ── Encoder button — tap: cycle layer / hold: mute ────────────────────────
     macropad.encoder_switch_debounced.update()
 
     if macropad.encoder_switch_debounced.fell:
         S["enc_held_start"] = time.monotonic()
         S["enc_triggered"]  = False
 
-    # While held, check for long-press threshold
     if S["enc_held_start"] and not macropad.encoder_switch_debounced.value:
         if (
             not S["enc_triggered"]
@@ -255,10 +282,9 @@ while True:
             S["enc_triggered"] = True
             refresh_display("MUTED")
 
-    # On release, fire tap action if hold never triggered
     if macropad.encoder_switch_debounced.rose:
         if not S["enc_triggered"]:
-            S["layer"] = 1 - S["layer"]
+            S["layer"] = (S["layer"] + 1) % 3   # cycles 0 → 1 → 2 → 0
             refresh_pixels()
             refresh_display()
         S["enc_held_start"] = None
