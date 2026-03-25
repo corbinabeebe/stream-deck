@@ -10,7 +10,9 @@ This guide covers everything needed to get the MacroPad and its companion Twitch
 2. [Twitch Service Setup](#2-twitch-service-setup)
 3. [OBS Hotkey Configuration](#3-obs-hotkey-configuration)
 4. [Discord Keybind Configuration](#4-discord-keybind-configuration)
-5. [Running the Service on Boot](#5-running-the-service-on-boot)
+5. [Twitch Bot Commands](#5-twitch-bot-commands)
+6. [Running the Service on Boot](#6-running-the-service-on-boot)
+7. [Full Key Layout Reference](#7-full-key-layout-reference)
 
 ---
 
@@ -162,7 +164,38 @@ Discord mic and deafen controls only respond to hotkeys defined inside Discord.
 
 ---
 
-## 5. Running the Service on Boot
+## 5. Twitch Bot Commands
+
+Layer 1 (Twitch Commands) posts chat commands like `!hype`, `!dadjoke`, `!discord`, etc. These rely on a Twitch bot in your channel that responds to them. The MacroPad just posts the message — the bot does the rest.
+
+### If you use sery_bot
+
+Most of these commands (`!uptime`, `!hype`, `!discord`, `!socials`, `!schedule`, etc.) are built into [sery_bot](https://sery_bot.com). Make sure sery_bot is modded in your channel and the relevant commands are enabled in its dashboard.
+
+### If a command isn't supported by your bot
+
+Use [Nightbot](https://nightbot.tv), [StreamElements](https://streamelements.com), or any other bot to create a custom command. Example setup in Nightbot:
+
+1. Go to [nightbot.tv](https://nightbot.tv) → **Commands → Custom**
+2. Click **Add Command**
+3. Set the **Command** field to `!dadjoke` (or whichever label)
+4. Set the **Message** field to whatever response you want (static text, or a `$(urlfetch)` call to an API)
+5. Click **Submit**
+
+Repeat for any Layer 1 button whose command your primary bot doesn't handle. The MacroPad doesn't care which bot responds — it just posts to chat.
+
+### Commands with no bot required
+
+| Button | Action | Bot needed? |
+|--------|--------|-------------|
+| EKLIPSE | Posts `!eklipse` | Yes — Eklipse.gg monitors your chat for this |
+| MARKER | Creates Twitch VOD marker | **No** — handled directly by the Node.js service via Helix API |
+| LURK (Layer 2) | Posts `!lurk` | Optional — or set up a custom `!lurk` response |
+| AD (Layer 2) | Starts Twitch ad break | **No** — handled directly by the Node.js service via Helix API |
+
+---
+
+## 6. Running the Service on Boot
 
 You want the Twitch service running automatically when Windows starts so it's ready before you go live.
 
@@ -199,3 +232,60 @@ pm2 stop macropad-twitch     # stop
    - Start in: `C:\path\to\stream-deck\twitch`
 5. **Settings** tab: check *If the task is already running, do not start a new instance*
 6. Click **OK**
+
+---
+
+## 7. Full Key Layout Reference
+
+Quick reference for all three layers. For full details see [BUTTON_REFERENCE.md](BUTTON_REFERENCE.md).
+
+### Layer 0 — Stream Control (Blue LEDs)
+
+| Key | Label | Hotkey | Action |
+|-----|-------|--------|--------|
+| 1 | STARTING | Ctrl+Alt+1 | OBS scene: Stream Starting |
+| 2 | STEAM | Ctrl+Alt+2 | OBS scene: Steam |
+| 3 | LIVE | Ctrl+Alt+3 | OBS scene: Live (w/ Cam) — starts uptime clock |
+| 4 | GHOST | Ctrl+Alt+4 | OBS scene: Ghost |
+| 5 | BRB | Ctrl+Alt+5 | OBS scene: BRB |
+| 6 | CHAT | Ctrl+Alt+6 | OBS scene: Just Chatting |
+| 7 | TWITTER | Ctrl+Alt+7 | OBS scene: Twitter |
+| 8 | END SCN | Ctrl+Alt+8 | OBS scene: End Stream |
+| 9 | REFRESH | Ctrl+Alt+R | Refresh all OBS browser sources |
+| 10 | MIC | Ctrl+Alt+M | Toggle mic mute/unmute |
+| 11 | START | Ctrl+Alt+Shift+F11 | Start streaming *(purple LED)* |
+| 12 | STOP | — | 30-second stop-stream countdown *(red LED)* |
+
+### Layer 1 — Twitch Commands (Green LEDs)
+
+Handled by the Node.js service. No OBS or Discord setup needed — see [Section 5](#5-twitch-bot-commands) for bot setup.
+
+| Key | Label | Hotkey | Action |
+|-----|-------|--------|--------|
+| 1 | EKLIPSE | F13 | Posts `!eklipse` to chat |
+| 2 | MARKER | F14 | Creates Twitch VOD bookmark (Helix API) |
+| 3 | HYPE | F15 | Posts `!hype` to chat |
+| 4 | JOKE | F16 | Posts `!dadjoke` to chat |
+| 5 | DOGFACT | F17 | Posts `!dogfact` to chat |
+| 6 | DISCORD | F18 | Posts `!discord` to chat |
+| 7 | SOCIALS | F19 | Posts `!socials` to chat |
+| 8 | SCHED | F20 | Posts `!schedule` to chat |
+| 9 | UPTIME | F21 | Posts `!uptime` to chat |
+| 10–12 | (open) | F22–F24 | Reserved |
+
+### Layer 2 — Productivity (Yellow LEDs)
+
+| Key | Label | Hotkey | Action | Setup needed |
+|-----|-------|--------|--------|--------------|
+| 1 | PLAY | consumer | Media play/pause | None |
+| 2 | SKIP | consumer | Next track | None |
+| 3 | PREV | consumer | Previous track | None |
+| 4 | MUTE-M | consumer | System audio mute | None |
+| 5 | D-MUTE | Ctrl+Alt+F1 | Discord mic toggle | Discord keybind (Section 4) |
+| 6 | D-DEAF | Ctrl+Alt+F2 | Discord deafen | Discord keybind (Section 4) |
+| 7 | RELOAD | Ctrl+Alt+R | Refresh OBS browser sources | OBS hotkey (Section 3) |
+| 8 | LURK | Ctrl+Shift+F1 | Posts `!lurk` to chat | Node.js service (auto) |
+| 9 | SNAP | Win+Shift+S | Windows Snipping Tool | None |
+| 10 | LOCK | Win+L | Lock screen | None |
+| 11 | AD | Ctrl+Shift+F2 | Start 30s Twitch ad break | Node.js service (auto) |
+| 12 | TIMER | Ctrl+Alt+T | OBS BRB timer scene | OBS hotkey (Section 3) |
