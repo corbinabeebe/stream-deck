@@ -75,21 +75,23 @@ S = {
 
 KEYMAP = [
     # ── Layer 0: Stream Control ───────────────────────────────────────────────
+    # All keys send Ctrl+Alt+Shift+Fx hotkeys intercepted by the Node.js service,
+    # which calls OBS WebSocket directly — OBS does NOT need to be the active window.
     # Row 1                      Row 2                Row 3
     # [STARTING][STEAM][LIVE]    [GHOST][BRB][CHAT]   [TWITTER][END SCN][REFRESH]
     # Row 4
     # [MIC][START][STOP]
     [
-        ("STARTING", "keys", (CTRL, ALT, Keycode.ONE)),
-        ("STEAM",    "keys", (CTRL, ALT, Keycode.TWO)),
-        ("LIVE",     "keys", (CTRL, ALT, Keycode.THREE)),
-        ("GHOST",    "keys", (CTRL, ALT, Keycode.FOUR)),
-        ("BRB",      "keys", (CTRL, ALT, Keycode.FIVE)),
-        ("CHAT",     "keys", (CTRL, ALT, Keycode.SIX)),
-        ("TWITTER",  "keys", (CTRL, ALT, Keycode.SEVEN)),
-        ("END SCN",  "keys", (CTRL, ALT, Keycode.EIGHT)),
-        ("REFRESH",  "keys", (CTRL, ALT, Keycode.R)),
-        ("MIC",      "keys", (CTRL, ALT, Keycode.M)),
+        ("STARTING", "keys", (CTRL, ALT, SHIFT, Keycode.F1)),
+        ("STEAM",    "keys", (CTRL, ALT, SHIFT, Keycode.F2)),
+        ("LIVE",     "keys", (CTRL, ALT, SHIFT, Keycode.F3)),
+        ("GHOST",    "keys", (CTRL, ALT, SHIFT, Keycode.F4)),
+        ("BRB",      "keys", (CTRL, ALT, SHIFT, Keycode.F5)),
+        ("CHAT",     "keys", (CTRL, ALT, SHIFT, Keycode.F6)),
+        ("TWITTER",  "keys", (CTRL, ALT, SHIFT, Keycode.F7)),
+        ("END SCN",  "keys", (CTRL, ALT, SHIFT, Keycode.F8)),
+        ("REFRESH",  "keys", (CTRL, ALT, SHIFT, Keycode.R)),
+        ("MIC",      "keys", (CTRL, ALT, SHIFT, Keycode.M)),
         ("START",    "keys", (CTRL, ALT, SHIFT, Keycode.F11)),
         ("STOP",     "exit", None),
     ],
@@ -125,7 +127,7 @@ KEYMAP = [
         ("MUTE-M", "consumer", ConsumerControlCode.MUTE),
         ("D-MUTE", "keys",     (CTRL, ALT, Keycode.F1)),
         ("D-DEAF", "keys",     (CTRL, ALT, Keycode.F2)),
-        ("RELOAD", "keys",     (CTRL, ALT, Keycode.R)),
+        ("RELOAD", "keys",     (CTRL, ALT, SHIFT, Keycode.R)),
         ("LURK",   "keys",     (CTRL, SHIFT, Keycode.F1)),
         ("SNAP",   "keys",     (Keycode.GUI, SHIFT, Keycode.S)),
         ("LOCK",   "keys",     (Keycode.GUI, Keycode.L)),
@@ -183,8 +185,8 @@ def _send_keys(payload):
 def _begin_exit():
     S["exit_active"] = True
     S["exit_start"]  = time.monotonic()
-    # Switch OBS to "End Stream" scene
-    macropad.keyboard.press(CTRL, ALT, Keycode.EIGHT)
+    # Switch OBS to "End Stream" scene via the service (same hotkey as END SCN key)
+    macropad.keyboard.press(CTRL, ALT, SHIFT, Keycode.F8)
     macropad.keyboard.release_all()
 
 

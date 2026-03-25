@@ -1,7 +1,8 @@
 require('dotenv').config();
-const { uIOhook }                                    = require('uiohook-napi');
+const { uIOhook }                                              = require('uiohook-napi');
 const { postChatMessage, createStreamMarker, startCommercial } = require('./twitch');
-const { getAction }                                  = require('./config');
+const { setScene, startStream, stopStream, toggleMic, refreshBrowserSources } = require('./obs');
+const { getAction }                                            = require('./config');
 
 // Validate required env vars before starting
 const required = ['CLIENT_ID', 'CLIENT_SECRET', 'ACCESS_TOKEN', 'BROADCASTER_ID', 'SENDER_ID'];
@@ -12,7 +13,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-console.log('[MacroPad] Twitch service started — listening for hotkeys...\n');
+console.log('[MacroPad] Service started — listening for hotkeys...\n');
 
 uIOhook.on('keydown', async (event) => {
   const action = getAction(event);
@@ -23,6 +24,33 @@ uIOhook.on('keydown', async (event) => {
 
   try {
     switch (action.type) {
+      // ── OBS actions ──────────────────────────────────────────────────────────
+      case 'obs_scene':
+        await setScene(action.scene);
+        console.log(`→ scene: ${action.scene}`);
+        break;
+
+      case 'obs_start':
+        await startStream();
+        console.log('→ stream started');
+        break;
+
+      case 'obs_stop':
+        await stopStream();
+        console.log('→ stream stopped');
+        break;
+
+      case 'obs_mic':
+        await toggleMic();
+        console.log('→ mic toggled');
+        break;
+
+      case 'obs_refresh':
+        await refreshBrowserSources();
+        console.log('→ browser sources refreshed');
+        break;
+
+      // ── Twitch actions ───────────────────────────────────────────────────────
       case 'chat':
         await postChatMessage(action.message);
         console.log(`→ ${action.message}`);

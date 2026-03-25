@@ -1,7 +1,7 @@
 {
-  "name": "twitch-macropad-service",
+  "name": "stream-deck-service",
   "version": "1.0.0",
-  "description": "MacroPad → Twitch API bridge. Listens for global hotkeys and routes them to the Twitch Helix API.",
+  "description": "MacroPad service. Listens for global hotkeys and routes them to OBS WebSocket and the Twitch Helix API.",
   "main": "service.js",
   "scripts": {
     "start": "node service.js",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
+    "obs-websocket-js": "^5.0.3",
     "uiohook-napi": "^1.5.4"
   }
 }
