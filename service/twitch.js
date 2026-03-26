@@ -79,10 +79,11 @@ async function createStreamMarker() {
       description: 'MacroPad marker',
     }),
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(`Stream marker failed: ${JSON.stringify(err)}`);
-  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(`Stream marker failed: ${JSON.stringify(data)}`);
+  const m = data.data?.[0];
+  if (m) console.log(`  [marker] id=${m.id} pos=${m.position_seconds}s`);
+  else    console.log(`  [marker] response:`, JSON.stringify(data));
 }
 
 // POST /helix/channels/commercial — starts an ad break

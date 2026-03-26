@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./logger');
 const { uIOhook }                                              = require('uiohook-napi');
 const { postChatMessage, createStreamMarker, startCommercial } = require('./twitch');
 const { setScene, startStream, stopStream, toggleMic, refreshBrowserSources } = require('./obs');
