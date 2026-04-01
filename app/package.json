@@ -1,0 +1,44 @@
+{
+  "name": "macropad-manager",
+  "version": "1.0.0",
+  "description": "MacroPad Service Manager — start/stop the service and view live logs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w uiohook-napi",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "obs-websocket-js": "^5.0.3",
+    "uiohook-napi": "^1.5.4"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "latest",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.macropad.manager",
+    "productName": "MacroPad Manager",
+    "npmRebuild": false,
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/.cache/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../service",
+        "to": "service",
+        "filter": ["*.js"]
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/uiohook-napi/**"
+    ]
+  }
+}

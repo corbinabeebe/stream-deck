@@ -7,27 +7,27 @@ This guide covers everything needed to get the MacroPad and its companion Twitch
 ## Table of Contents
 
 1. [Prerequisites](#1-prerequisites)
-2. [Twitch Service Setup](#2-twitch-service-setup)
+2. [MacroPad Manager App Setup](#2-macropad-manager-app-setup)
 3. [OBS Hotkey Configuration](#3-obs-hotkey-configuration)
 4. [Discord Keybind Configuration](#4-discord-keybind-configuration)
 5. [Twitch Bot Commands](#5-twitch-bot-commands)
-6. [Running the Service on Boot](#6-running-the-service-on-boot)
+6. [Running on Boot](#6-running-on-boot)
 7. [Full Key Layout Reference](#7-full-key-layout-reference)
+8. [.env Reference](#8-env-reference)
 
 ---
 
 ## 1. Prerequisites
 
-- **Node.js 18+** — [nodejs.org](https://nodejs.org). Verify: `node --version`
 - **MacroPad flashed** with `code.py` (see [README](README.md) for firmware deployment)
 - **OBS Studio** running with your scenes configured
 - A **Twitch account** (the service posts to chat as you — no separate bot account needed)
 
 ---
 
-## 2. Twitch Service Setup
+## 2. MacroPad Manager App Setup
 
-The `twitch/` service is a Node.js process that runs in the background on your stream PC. It listens for F-key hotkeys from the MacroPad and routes them to the Twitch API.
+The **MacroPad Manager** is a Windows desktop app that runs the companion service. It listens for hotkeys from the MacroPad and routes them to OBS WebSocket and the Twitch API.
 
 ### Step 1 — Create a Twitch Developer App
 
@@ -41,40 +41,23 @@ The `twitch/` service is a Node.js process that runs in the background on your s
 5. Copy your **Client ID**
 6. Click **New Secret** and copy your **Client Secret** — save it somewhere safe, it won't be shown again
 
-### Step 2 — Configure your `.env` file
+### Step 2 — Run the OAuth flow
+
+This generates your access tokens. Requires [Node.js 18+](https://nodejs.org).
 
 ```
-cd twitch
+cd service
 copy .env.example .env
 ```
 
-Open `twitch/.env` in a text editor and fill in your Client ID and Secret:
+Open `service\.env` and fill in `CLIENT_ID` and `CLIENT_SECRET`, then run:
 
 ```
-CLIENT_ID=paste_your_client_id_here
-CLIENT_SECRET=paste_your_client_secret_here
-ACCESS_TOKEN=
-REFRESH_TOKEN=
-BROADCASTER_ID=
-SENDER_ID=
-```
-
-Leave the bottom four fields empty for now — the auth step fills them in.
-
-### Step 3 — Install dependencies
-
-```
-cd twitch
 npm install
-```
-
-### Step 4 — Run the OAuth flow
-
-```
 npm run auth
 ```
 
-This starts a temporary local server and prints a Twitch authorization URL. Open that URL in your browser, log in as your Twitch account, and click **Authorize**. The terminal will print four values:
+This opens a browser OAuth flow. Log in as your Twitch account and click **Authorize**. The terminal will print four values — copy them into `service\.env`:
 
 ```
 ACCESS_TOKEN=...
@@ -83,23 +66,36 @@ BROADCASTER_ID=...
 SENDER_ID=...
 ```
 
-Copy all four lines into `twitch/.env`.
+### Step 3 — Install the app
 
-### Step 5 — Start the service
-
-```
-npm start
-```
-
-You should see:
+1. Run `MacroPad Manager Setup X.X.X.exe` from `app\dist\`
+2. Copy your completed `.env` to the install directory:
 
 ```
-[MacroPad] Twitch service started — listening for hotkeys...
+copy service\.env "%LOCALAPPDATA%\Programs\macropad-manager\.env"
 ```
 
-The service is now running. Press any Layer 1 key on the MacroPad — you'll see the action logged in the terminal and the command posted to your Twitch chat.
+### Step 4 — Configure OBS WebSocket
 
-> **Token expiry:** Access tokens expire after ~4 hours of inactivity. The service auto-refreshes them when it detects a 401 response and saves the new token back to `.env`. If the service has been offline for a long time, re-run `npm run auth`.
+In OBS: **Tools → WebSocket Server Settings** → enable the server (default port `4455`).
+
+If you set a password, add it to your `.env`:
+```
+OBS_WS_PASSWORD=your_password_here
+```
+
+Set `OBS_MIC_SOURCE` to match your mic's name in the OBS Audio Mixer (hover the fader to see the exact name):
+```
+OBS_MIC_SOURCE=Mic/Aux
+```
+
+See the full [.env reference](#8-env-reference) for all variables.
+
+### Step 5 — Launch
+
+Open **MacroPad Manager** from the Start Menu. The service starts automatically and logs appear in the window. Press any MacroPad button — you should see the action logged.
+
+> **Token expiry:** Access tokens expire after extended inactivity. The service auto-refreshes on 401 responses and saves the new token back to `.env`. If tokens stop working after a long offline period, re-run `npm run auth` from the `service/` directory and re-copy `.env`.
 
 ---
 
@@ -195,43 +191,14 @@ Repeat for any Layer 1 button whose command your primary bot doesn't handle. The
 
 ---
 
-## 6. Running the Service on Boot
+## 6. Running on Boot
 
-You want the Twitch service running automatically when Windows starts so it's ready before you go live.
+The MacroPad Manager app auto-starts the service when opened. To have it launch automatically on Windows login:
 
-### Option A — pm2 (recommended)
+1. Press `Win + R` → type `shell:startup` → press Enter
+2. Create a shortcut to `MacroPad Manager.exe` in that folder
 
-[pm2](https://pm2.keymetrics.io) is a process manager that handles auto-start, crash recovery, and logging.
-
-```
-npm install -g pm2
-cd twitch
-pm2 start service.js --name macropad-twitch
-pm2 save
-pm2 startup
-```
-
-Run the command that `pm2 startup` outputs (it registers a Windows startup task). The service will now start automatically on login and restart if it crashes.
-
-Useful pm2 commands:
-```
-pm2 logs macropad-twitch     # view live logs
-pm2 status                   # check if running
-pm2 restart macropad-twitch  # restart after config changes
-pm2 stop macropad-twitch     # stop
-```
-
-### Option B — Windows Task Scheduler
-
-1. Open **Task Scheduler** → **Create Task**
-2. **General** tab: check *Run only when user is logged on*
-3. **Triggers** tab: New → *At log on*
-4. **Actions** tab: New →
-   - Program: `node`
-   - Arguments: `C:\path\to\stream-deck\twitch\service.js`
-   - Start in: `C:\path\to\stream-deck\twitch`
-5. **Settings** tab: check *If the task is already running, do not start a new instance*
-6. Click **OK**
+The app will open on login and the service will start immediately.
 
 ---
 
@@ -289,3 +256,47 @@ Handled by the Node.js service. No OBS or Discord setup needed — see [Section 
 | 10 | LOCK | Win+L | Lock screen | None |
 | 11 | AD | Ctrl+Shift+F2 | Start 30s Twitch ad break | Node.js service (auto) |
 | 12 | TIMER | Ctrl+Alt+T | OBS BRB timer scene | OBS hotkey (Section 3) |
+
+---
+
+## 8. .env Reference
+
+The `.env` file lives next to `MacroPad Manager.exe` in `%LOCALAPPDATA%\Programs\macropad-manager\`. A template is at `service\.env.example`.
+
+### Twitch credentials
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CLIENT_ID` | Yes | Your Twitch Developer App's Client ID — from [dev.twitch.tv/console](https://dev.twitch.tv/console) |
+| `CLIENT_SECRET` | Yes | Your Twitch Developer App's Client Secret — generated in the same console |
+| `ACCESS_TOKEN` | Yes | OAuth user access token — generated by `npm run auth` |
+| `REFRESH_TOKEN` | Yes | OAuth refresh token — generated by `npm run auth`, used to auto-renew `ACCESS_TOKEN` |
+| `BROADCASTER_ID` | Yes | Your Twitch numeric user ID — printed by `npm run auth` after successful login |
+| `SENDER_ID` | Yes | The user ID that sends chat messages — same value as `BROADCASTER_ID` unless using a bot account |
+
+### OBS WebSocket
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OBS_WS_PORT` | No | `4455` | Port for OBS WebSocket server — change only if you customised it in OBS |
+| `OBS_WS_PASSWORD` | No | *(empty)* | Password for OBS WebSocket — leave blank if you haven't set one in OBS |
+| `OBS_MIC_SOURCE` | No | `Mic/Aux` | Exact name of your microphone input source in OBS. Check by hovering the fader in **Audio Mixer** |
+
+### Example `.env`
+
+```
+# Twitch
+CLIENT_ID=abc123yourid
+CLIENT_SECRET=xyz789yoursecret
+ACCESS_TOKEN=
+REFRESH_TOKEN=
+BROADCASTER_ID=
+SENDER_ID=
+
+# OBS WebSocket
+OBS_WS_PORT=4455
+OBS_WS_PASSWORD=
+OBS_MIC_SOURCE=Mic/Aux
+```
+
+Fill in `CLIENT_ID` and `CLIENT_SECRET` manually, then run `npm run auth` from the `service/` directory to populate the remaining four Twitch fields.

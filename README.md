@@ -10,7 +10,7 @@ A CircuitPython firmware for the **Adafruit MacroPad RP2040** — a 12-key macro
 
 ---
 
-## Installation
+## MacroPad Firmware
 
 ### 1. Flash CircuitPython
 
@@ -42,7 +42,42 @@ Copy `code.py` to the root of the `CIRCUITPY` drive. The MacroPad reboots and st
 
 ---
 
+## MacroPad Manager (Windows App)
+
+The **MacroPad Manager** is a Windows desktop app that runs the companion service — it bridges the MacroPad's hotkeys to OBS WebSocket and the Twitch API. It auto-starts the service on launch and shows a live log pane.
+
+### Install
+
+1. Build or download `MacroPad Manager Setup X.X.X.exe` from `app/dist/`
+2. Run the installer — installs to `%LOCALAPPDATA%\Programs\macropad-manager\`
+3. Create a `.env` file in the install directory (see [Setup Guide](SETUP_GUIDE.md#env-reference) for all variables):
+
+```
+%LOCALAPPDATA%\Programs\macropad-manager\.env
+```
+
+4. Launch **MacroPad Manager** from the Start Menu — the service starts automatically
+
+### Building the app yourself
+
+Requires [Node.js 18+](https://nodejs.org) and the VS Build Tools with C++ workload.
+
+```
+cd app
+npm install
+# Rebuild native addon against Electron (requires VS Build Tools):
+$env:VCINSTALLDIR = "C:\Program Files (x86)\Microsoft Visual Studio\<version>\BuildTools\VC\"
+npm run rebuild
+npm run dist
+```
+
+The installer is output to `app\dist\MacroPad Manager Setup X.X.X.exe`.
+
+> If you get a symlink error during `npm run dist`, enable **Developer Mode** in Windows Settings → System → For developers, then delete `%LOCALAPPDATA%\electron-builder\Cache\winCodeSign` and retry.
+
+---
+
 ## Documentation
 
 - [Button Reference](BUTTON_REFERENCE.md) — every button, layer, and encoder input explained
-- [Setup Guide](SETUP_GUIDE.md) — required configuration for OBS, Eklipse, Twitch, and Discord
+- [Setup Guide](SETUP_GUIDE.md) — OBS, Twitch, Discord configuration and `.env` reference

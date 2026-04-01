@@ -24,7 +24,7 @@ const ctrlAltShiftHotkeys = {
 // MacroPad sends these with no modifiers.
 const bareHotkeys = {
   [UiohookKey.F13]: { type: 'chat',   message: '!eklipse',   label: 'EKLIPSE'  },
-  [UiohookKey.F14]: { type: 'marker',                        label: 'MARKER'   },
+  [UiohookKey.F14]: { type: 'clip',                          label: 'CLIP'     },
   [UiohookKey.F15]: { type: 'chat',   message: '!hype',      label: 'HYPE'     },
   [UiohookKey.F16]: { type: 'chat',   message: '!dadjoke',   label: 'JOKE'     },
   [UiohookKey.F17]: { type: 'chat',   message: '!dogfact',   label: 'DOGFACT'  },

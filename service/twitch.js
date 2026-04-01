@@ -1,9 +1,9 @@
-require('dotenv').config();
 const fs   = require('fs');
 const path = require('path');
 
 const BASE_URL = 'https://api.twitch.tv/helix';
-const ENV_PATH = path.join(__dirname, '.env');
+// When running as packaged app, MACROPAD_ENV_PATH is set to the .env next to the .exe
+const ENV_PATH = process.env.MACROPAD_ENV_PATH || path.join(__dirname, '.env');
 
 function headers() {
   return {
@@ -70,20 +70,19 @@ async function postChatMessage(message) {
   }
 }
 
-// POST /helix/streams/markers — bookmarks the current VOD timestamp
-async function createStreamMarker() {
-  const res = await apiFetch(`${BASE_URL}/streams/markers`, {
+// POST /helix/clips — creates a clip of the past ~30-90s of the live stream
+async function createClip() {
+  const res = await apiFetch(`${BASE_URL}/clips`, {
     method: 'POST',
     body: JSON.stringify({
-      user_id:     process.env.BROADCASTER_ID,
-      description: 'MacroPad marker',
+      broadcaster_id: process.env.BROADCASTER_ID,
     }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(`Stream marker failed: ${JSON.stringify(data)}`);
-  const m = data.data?.[0];
-  if (m) console.log(`  [marker] id=${m.id} pos=${m.position_seconds}s`);
-  else    console.log(`  [marker] response:`, JSON.stringify(data));
+  if (!res.ok) throw new Error(`Clip failed: ${JSON.stringify(data)}`);
+  const c = data.data?.[0];
+  if (c) console.log(`  [clip] id=${c.id} url=${c.edit_url}`);
+  else    console.log(`  [clip] response:`, JSON.stringify(data));
 }
 
 // POST /helix/channels/commercial — starts an ad break
@@ -101,4 +100,4 @@ async function startCommercial(length = 30) {
   }
 }
 
-module.exports = { postChatMessage, createStreamMarker, startCommercial };
+module.exports = { postChatMessage, createClip, startCommercial };
