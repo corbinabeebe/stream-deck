@@ -168,10 +168,10 @@ Notes:
 |-----|-------|--------|---------------|
 | 1 | EKLIPSE | F13 | Post `!eklipse` to chat (Eklipse.gg highlight marker) |
 | 2 | MARKER | F14 | Create Twitch VOD stream marker (Helix API) |
-| 3 | HYPE | F15 | Post `!hype` to chat |
-| 4 | JOKE | F16 | Post `!dadjoke` to chat |
-| 5 | DOGFACT | F17 | Post `!dogfact` to chat |
-| 6 | DISCORD | F18 | Post `!discord` to chat |
+| 3 | BKTRACK | F18 | Save Aitum Backtrack clip (OBS hotkey — configure F18 in OBS) |
+| 4 | HYPE | F15 | Post `!hype` to chat |
+| 5 | JOKE | F16 | Post `!dadjoke` to chat |
+| 6 | DOGFACT | F17 | Post `!dogfact` to chat |
 | 7 | SOCIALS | F19 | Post `!socials` to chat |
 | 8 | SCHED | F20 | Post `!schedule` to chat |
 | 9 | UPTIME | F21 | Post `!uptime` to chat |

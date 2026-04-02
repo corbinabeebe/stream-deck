@@ -82,10 +82,10 @@
 
 ```
 ┌─────────┐ ┌────────┐ ┌────────┐
-│ 1 EKLPSE│ │2 MARKER│ │ 3 HYPE │
+│ 1 EKLPSE│ │2 MARKER│ │3 BKTRCK│
 └─────────┘ └────────┘ └────────┘
 ┌────────┐ ┌────────┐ ┌────────┐
-│ 4 JOKE │ │5 DOGFCT│ │6 DISCRD│
+│ 4 HYPE │ │ 5 JOKE │ │6 DOGFCT│
 └────────┘ └────────┘ └────────┘
 ┌────────┐ ┌────────┐ ┌────────┐
 │7 SOCIAL│ │ 8 SCHED│ │9 UPTIME│
@@ -95,18 +95,18 @@
 └────────┘ └────────┘ └────────┘
 ```
 
-| Button | Label | Hotkey | Twitch Action |
-|--------|-------|--------|---------------|
+| Button | Label | Hotkey | Action |
+|--------|-------|--------|--------|
 | **1** | EKLIPSE | F13 | Posts `!eklipse` to chat (signals Eklipse.gg to mark highlight) |
 | **2** | MARKER | F14 | Creates a native Twitch VOD bookmark via Helix API |
-| **3** | HYPE | F15 | Posts `!hype` to chat |
-| **4** | JOKE | F16 | Posts `!dadjoke` to chat |
-| **5** | DOGFACT | F17 | Posts `!dogfact` to chat |
-| **6** | DISCORD | F18 | Posts `!discord` to chat |
+| **3** | BKTRACK | F18 | Saves Aitum Backtrack clip (configure F18 in OBS hotkeys) |
+| **4** | HYPE | F15 | Posts `!hype` to chat |
+| **5** | JOKE | F16 | Posts `!dadjoke` to chat |
+| **6** | DOGFACT | F17 | Posts `!dogfact` to chat |
 | **7** | SOCIALS | F19 | Posts `!socials` to chat |
 | **8** | SCHED | F20 | Posts `!schedule` to chat |
 | **9** | UPTIME | F21 | Posts `!uptime` to chat |
-| **10–12** | (open) | F22–F24 | Reserved for future commands |
+| **10–12** | (open) | — | Reserved for future commands |
 
 > Chat commands rely on your Twitch bot (sery_bot, Nightbot, etc.) responding to them in channel. See the Setup Guide for bot configuration details.
 

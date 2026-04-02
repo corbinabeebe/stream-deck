@@ -96,18 +96,18 @@ KEYMAP = [
         ("STOP",     "exit", None),
     ],
     # ── Layer 1: Twitch Commands ──────────────────────────────────────────────
-    # F13-F22 hotkeys are intercepted by the Node.js twitch service on the PC.
-    # Row 1                      Row 2                  Row 3
-    # [EKLIPSE][CLIP][CLIP45]    [CLIP60][HYPE][JOKE]   [DOGFACT][----][----]
+    # F13-F22 hotkeys intercepted by OBS or the Node.js twitch service on the PC.
+    # Row 1                         Row 2                    Row 3
+    # [EKLIPSE][MARKER][BKTRACK]    [HYPE][JOKE][DOGFACT]   [SOCIALS][SCHED][UPTIME]
     # Row 4
     # [----][----][----]
     [
         ("EKLIPSE", "keys", (Keycode.F13,)),
         ("MARKER",  "keys", (Keycode.F14,)),
+        ("BKTRACK", "keys", (Keycode.F18,)),
         ("HYPE",    "keys", (Keycode.F15,)),
         ("JOKE",    "keys", (Keycode.F16,)),
         ("DOGFACT", "keys", (Keycode.F17,)),
-        ("DISCORD", "keys", (Keycode.F18,)),
         ("SOCIALS", "keys", (Keycode.F19,)),
         ("SCHED",   "keys", (Keycode.F20,)),
         ("UPTIME",  "keys", (Keycode.F21,)),
