@@ -55,7 +55,7 @@
 │7 TWITR │ │8 END SCN│ │9 REFSH │
 └────────┘ └────────┘ └────────┘
 ┌────────┐ ┌────────┐ ┌────────┐
-│ 10 MIC │ │11 START│ │12 STOP │ ← 11=PURPLE, 12=RED
+│10 BKTRK│ │11 START│ │12 STOP │ ← 11=PURPLE, 12=RED
 └────────┘ └────────┘ └────────┘
 ```
 
@@ -70,7 +70,7 @@
 | **7** | TWITTER | Ctrl+Alt+7 | Switch OBS to Twitter scene |
 | **8** | END SCN | Ctrl+Alt+8 | Switch OBS to End Stream scene (ending overlay) |
 | **9** | REFRESH | Ctrl+Alt+R | Refresh all OBS browser sources |
-| **10** | MIC | Ctrl+Alt+M | Toggle mic mute/unmute |
+| **10** | BKTRACK | Ctrl+Alt+Shift+M | Save Aitum Backtrack clip (triggers OBS hotkey F18 via WebSocket) |
 | **11** | START | Ctrl+Alt+Shift+F11 | Start streaming |
 | **12** | STOP | — | Start 30-second stop-stream countdown (press again to cancel) |
 
@@ -82,7 +82,7 @@
 
 ```
 ┌─────────┐ ┌────────┐ ┌────────┐
-│ 1 EKLPSE│ │2 MARKER│ │3 BKTRCK│
+│ 1 EKLPSE│ │ 2 CLIP │ │3 (open)│
 └─────────┘ └────────┘ └────────┘
 ┌────────┐ ┌────────┐ ┌────────┐
 │ 4 HYPE │ │ 5 JOKE │ │6 DOGFCT│
@@ -98,8 +98,8 @@
 | Button | Label | Hotkey | Action |
 |--------|-------|--------|--------|
 | **1** | EKLIPSE | F13 | Posts `!eklipse` to chat (signals Eklipse.gg to mark highlight) |
-| **2** | MARKER | F14 | Creates a native Twitch VOD bookmark via Helix API |
-| **3** | BKTRACK | F18 | Saves Aitum Backtrack clip (configure F18 in OBS hotkeys) |
+| **2** | CLIP | F14 | Creates a Twitch clip via Helix API |
+| **3** | (open) | — | Reserved |
 | **4** | HYPE | F15 | Posts `!hype` to chat |
 | **5** | JOKE | F16 | Posts `!dadjoke` to chat |
 | **6** | DOGFACT | F17 | Posts `!dogfact` to chat |
