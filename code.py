@@ -91,7 +91,7 @@ KEYMAP = [
         ("TWITTER",  "keys", (CTRL, ALT, SHIFT, Keycode.F7)),
         ("END SCN",  "keys", (CTRL, ALT, SHIFT, Keycode.F8)),
         ("REFRESH",  "keys", (CTRL, ALT, SHIFT, Keycode.R)),
-        ("MIC",      "keys", (CTRL, ALT, SHIFT, Keycode.M)),
+        ("BKTRACK",  "keys", (CTRL, ALT, SHIFT, Keycode.M)),
         ("START",    "keys", (CTRL, ALT, SHIFT, Keycode.F11)),
         ("STOP",     "exit", None),
     ],
@@ -104,7 +104,7 @@ KEYMAP = [
     [
         ("EKLIPSE", "keys", (Keycode.F13,)),
         ("MARKER",  "keys", (Keycode.F14,)),
-        ("BKTRACK", "keys", (Keycode.F18,)),
+        ("----",    "none", None),
         ("HYPE",    "keys", (Keycode.F15,)),
         ("JOKE",    "keys", (Keycode.F16,)),
         ("DOGFACT", "keys", (Keycode.F17,)),

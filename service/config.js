@@ -15,7 +15,7 @@ const ctrlAltShiftHotkeys = {
   [UiohookKey.F7]:  { type: 'obs_scene',   scene: 'Twitter',         label: 'TWITTER'  },
   [UiohookKey.F8]:  { type: 'obs_scene',   scene: 'End Stream',      label: 'END SCN'  },
   [UiohookKey.R]:   { type: 'obs_refresh',                            label: 'REFRESH'  },
-  [UiohookKey.M]:   { type: 'obs_mic',                                label: 'MIC'      },
+  [UiohookKey.M]:   { type: 'obs_hotkey', keyId: 'OBS_KEY_F18',      label: 'BKTRACK'  },
   [UiohookKey.F11]: { type: 'obs_start',                              label: 'START'    },
   [UiohookKey.F12]: { type: 'obs_stop',                               label: 'STOP'     },
 };
@@ -27,8 +27,7 @@ const bareHotkeys = {
   [UiohookKey.F14]: { type: 'clip',                          label: 'CLIP'     },
   [UiohookKey.F15]: { type: 'chat',   message: '!hype',      label: 'HYPE'     },
   [UiohookKey.F16]: { type: 'chat',   message: '!dadjoke',   label: 'JOKE'     },
-  [UiohookKey.F17]: { type: 'chat',   message: '!dogfact',   label: 'DOGFACT'  },
-  [UiohookKey.F18]: { type: 'chat',   message: '!discord',   label: 'DISCORD'  },
+  [UiohookKey.F17]: { type: 'chat',        message: '!dogfact',   label: 'DOGFACT'  },
   [UiohookKey.F19]: { type: 'chat',   message: '!socials',   label: 'SOCIALS'  },
   [UiohookKey.F20]: { type: 'chat',   message: '!schedule',  label: 'SCHED'    },
   [UiohookKey.F21]: { type: 'chat',   message: '!uptime',    label: 'UPTIME'   },

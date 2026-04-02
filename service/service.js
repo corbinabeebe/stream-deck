@@ -1,7 +1,7 @@
 require('./logger');
 const { uIOhook }                                              = require('uiohook-napi');
 const { postChatMessage, createClip, startCommercial }        = require('./twitch');
-const { setScene, startStream, stopStream, toggleMic, refreshBrowserSources } = require('./obs');
+const { setScene, startStream, stopStream, toggleMic, refreshBrowserSources, triggerHotkey } = require('./obs');
 const { getAction }                                            = require('./config');
 
 const REQUIRED = ['CLIENT_ID', 'CLIENT_SECRET', 'ACCESS_TOKEN', 'BROADCASTER_ID', 'SENDER_ID'];
@@ -36,6 +36,11 @@ async function handleKeydown(event) {
         console.log(`${prefix} → mic toggled`);
         break;
 
+      case 'obs_hotkey':
+        await triggerHotkey(action.keyId);
+        console.log(`${prefix} → hotkey ${action.keyId} triggered`);
+        break;
+
       case 'obs_refresh':
         await refreshBrowserSources();
         console.log(`${prefix} → browser sources refreshed`);
@@ -45,6 +50,10 @@ async function handleKeydown(event) {
       case 'chat':
         await postChatMessage(action.message);
         console.log(`${prefix} → ${action.message}`);
+        break;
+
+      case 'passthrough':
+        console.log(`${prefix} → passed to OBS`);
         break;
 
       case 'clip':

@@ -79,6 +79,12 @@ async function toggleMic() {
   await obs.call('ToggleInputMute', { inputName });
 }
 
+// Triggers a hotkey by key sequence via WebSocket — works regardless of window focus.
+async function triggerHotkey(keyId) {
+  await ensureConnected();
+  await obs.call('TriggerHotkeyByKeySequence', { keyId });
+}
+
 // Clicks "Refresh cache" on every browser source in the scene collection.
 async function refreshBrowserSources() {
   await ensureConnected();
@@ -88,4 +94,4 @@ async function refreshBrowserSources() {
   }
 }
 
-module.exports = { setScene, startStream, stopStream, toggleMic, refreshBrowserSources };
+module.exports = { setScene, startStream, stopStream, toggleMic, refreshBrowserSources, triggerHotkey };

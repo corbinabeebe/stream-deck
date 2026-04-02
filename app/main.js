@@ -6,9 +6,9 @@ let win;
 let serviceRunning = false;
 let service = null;
 
-// .env location: next to the .exe when packaged, service/ dir in dev
+// .env location: user data dir when packaged (survives reinstalls), service/ dir in dev
 const envPath = app.isPackaged
-  ? path.join(path.dirname(process.execPath), '.env')
+  ? path.join(app.getPath('userData'), '.env')
   : path.join(__dirname, '..', 'service', '.env');
 
 // Tell twitch.js where to write token refreshes back to
@@ -79,8 +79,23 @@ function stopService() {
   win?.webContents.send('status', 'stopped');
 }
 
+function reloadService() {
+  stopService();
+  // Clear require cache for all service modules so they're re-read from disk
+  const serviceDir = app.isPackaged
+    ? path.join(process.resourcesPath, 'service')
+    : path.join(__dirname, '..', 'service');
+  for (const key of Object.keys(require.cache)) {
+    if (key.startsWith(serviceDir)) delete require.cache[key];
+  }
+  service = null;
+  console.log('[MacroPad] Service modules reloaded from disk.');
+  startService();
+}
+
 ipcMain.on('start', startService);
 ipcMain.on('stop', stopService);
+ipcMain.on('update', reloadService);
 ipcMain.handle('getStatus', () => (serviceRunning ? 'running' : 'stopped'));
 
 app.whenReady().then(() => {

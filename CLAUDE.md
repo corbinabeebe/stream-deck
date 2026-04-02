@@ -127,8 +127,8 @@ The service connects lazily on first use and reconnects automatically if OBS res
 | Action | Endpoint |
 |--------|----------|
 | Send chat message | `POST /helix/chat/messages` |
-| Twitch ad break | `POST /helix/channels/commercial` |
 | Create clip | `POST /helix/clips` |
+| Twitch ad break | `POST /helix/channels/commercial` |
 
 Chat commands (`!eklipse`, `!hype`, etc.) are sent as chat messages — Twitch bots (sery_bot, etc.) respond to them in channel.
 
@@ -151,7 +151,7 @@ All keys send `Ctrl+Alt+Shift+Fx` hotkeys intercepted by the service, which call
 | 7 | TWITTER | Ctrl+Alt+Shift+F7 | Scene: Twitter |
 | 8 | END SCN | Ctrl+Alt+Shift+F8 | Scene: End Stream (ending overlay) |
 | 9 | REFRESH | Ctrl+Alt+Shift+R | Refresh all browser sources |
-| 10 | MIC | Ctrl+Alt+Shift+M | Toggle mic mute (`OBS_MIC_SOURCE`) |
+| 10 | BKTRACK | Ctrl+Alt+Shift+M | Save Aitum Backtrack clip (via OBS WebSocket `TriggerHotkeyByKeySequence` F18) |
 | 11 | START | **Purple** Ctrl+Alt+Shift+F11 | Start streaming |
 | 12 | STOP | **Red** — exit action | Stop-stream sequence — 30s countdown, press again to cancel |
 
@@ -167,8 +167,8 @@ Notes:
 | Key | Label | Hotkey | Twitch Action |
 |-----|-------|--------|---------------|
 | 1 | EKLIPSE | F13 | Post `!eklipse` to chat (Eklipse.gg highlight marker) |
-| 2 | MARKER | F14 | Create Twitch VOD stream marker (Helix API) |
-| 3 | BKTRACK | F18 | Save Aitum Backtrack clip (OBS hotkey — configure F18 in OBS) |
+| 2 | CLIP | F14 | Create Twitch clip (Helix API) |
+| 3 | (open) | F18 | Reserved |
 | 4 | HYPE | F15 | Post `!hype` to chat |
 | 5 | JOKE | F16 | Post `!dadjoke` to chat |
 | 6 | DOGFACT | F17 | Post `!dogfact` to chat |
